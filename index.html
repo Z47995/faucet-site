@@ -10,11 +10,11 @@
         .ad-box { background: #252535; border: 1px dashed #444; padding: 15px; margin: 15px 0; border-radius: 8px; color: #888; font-size: 13px; }
         .captcha-card { background: #12121a; padding: 15px; border-radius: 12px; margin: 15px 0; border: 1px solid #333; }
         .icons-grid { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
-        .icon-btn { background: #252535; border: 2px solid #3a3a50; border-radius: 8px; padding: 10px; cursor: pointer; font-size: 20px; transition: 0.2s; }
+        .icon-btn { background: #252535; border: 2px solid #3a3a50; border-radius: 8px; width: 50px; height: 50px; cursor: pointer; font-size: 22px; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
         .icon-btn:hover { border-color: #00ff88; background: #2a3a30; }
         .btn-claim { width: 100%; background: #00ff88; color: #000; font-weight: bold; padding: 14px; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; opacity: 0.5; pointer-events: none; }
         .btn-claim.active { opacity: 1; pointer-events: auto; }
-        .status-msg { margin-top: 10px; color: #00ff88; font-weight: bold; display: none; }
+        .status-msg { margin-top: 15px; color: #00ff88; font-weight: bold; display: none; }
     </style>
 </head>
 <body>
@@ -28,16 +28,13 @@
         [Top Ad Banner Space: A-Ads / Monetag]
     </div>
 
-    <!-- Human Verification Captcha -->
+    <!-- Dynamic Anti-Bot Captcha -->
     <div class="captcha-card">
-        <p style="font-size: 14px; color: #ccc;">Select the icon that matches the one above:</p>
-        <div id="target-icon" style="font-size: 28px; margin: 10px 0;">⭐</div>
+        <p style="font-size: 14px; color: #ccc;">Security Check: Select matching icon</p>
+        <div id="target-icon" style="font-size: 32px; margin: 10px 0;">🔄</div>
         
-        <div class="icons-grid">
-            <button class="icon-btn" onclick="checkCaptcha(this, '🚀')">🚀</button>
-            <button class="icon-btn" onclick="checkCaptcha(this, '⭐')">⭐</button>
-            <button class="icon-btn" onclick="checkCaptcha(this, '🔥')">🔥</button>
-            <button class="icon-btn" onclick="checkCaptcha(this, '💎')">💎</button>
+        <div class="icons-grid" id="iconsContainer">
+            <!-- Dynamic buttons will load here -->
         </div>
     </div>
 
@@ -51,14 +48,43 @@
 </div>
 
 <script>
+    const pool = ['🚀', '⭐', '🔥', '💎', '🛡️', '⚡', '🌀', '🔮'];
+    let correctIcon = '';
     let isHuman = false;
-    function checkCaptcha(btn, icon) {
-        if(icon === '⭐') {
+
+    function generateCaptcha() {
+        isHuman = false;
+        document.getElementById('claimBtn').classList.remove('active');
+        document.getElementById('status').style.display = 'none';
+
+        // Shuffle pool and pick target
+        let shuffled = [...pool].sort(() => 0.5 - Math.random());
+        correctIcon = shuffled[0];
+        document.getElementById('target-iconinnerText' || 'target-icon').innerText = correctIcon;
+
+        // Pick 4 random options including the correct one
+        let options = shuffled.slice(0, 4).sort(() => 0.5 - Math.random());
+        
+        let container = document.getElementById('iconsContainer');
+        container.innerHTML = '';
+        
+        options.forEach(icon => {
+            let btn = document.createElement('button');
+            btn.className = 'icon-btn';
+            btn.innerText = icon;
+            btn.onclick = () => checkCaptcha(icon);
+            container.appendChild(btn);
+        });
+    }
+
+    function checkCaptcha(selectedIcon) {
+        if(selectedIcon === correctIcon) {
             isHuman = true;
             document.getElementById('claimBtn').classList.add('active');
-            alert('Verification successful! You can now claim your reward.');
+            alert('Verification successful! Click claim below.');
         } else {
-            alert('Incorrect icon, please try again!');
+            alert('Wrong icon! Captcha reloaded for security.');
+            generateCaptcha();
         }
     }
 
@@ -66,9 +92,13 @@
         if(isHuman) {
             document.getElementById('status').style.display = 'block';
             document.getElementById('claimBtn').classList.remove('active');
-            isHuman = false;
+            // Reset captcha for next round after 2 seconds
+            setTimeout(generateCaptcha, 2000);
         }
     }
+
+    // Initialize on load
+    window.onload = generateCaptcha;
 </script>
 
 </body>
