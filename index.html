@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,7 +32,7 @@
     <!-- Dynamic Anti-Bot Captcha -->
     <div class="captcha-card">
         <p style="font-size: 14px; color: #ccc;">Security Check: Select matching icon</p>
-        <div id="target-icon" style="font-size: 32px; margin: 10px 0;">🔄</div>
+        <div id="target-icon" style="font-size: 32px; margin: 10px 0;">⭐</div>
         
         <div class="icons-grid" id="iconsContainer">
             <!-- Dynamic buttons will load here -->
@@ -60,7 +61,9 @@
         // Shuffle pool and pick target
         let shuffled = [...pool].sort(() => 0.5 - Math.random());
         correctIcon = shuffled[0];
-        document.getElementById('target-iconinnerText' || 'target-icon').innerText = correctIcon;
+        
+        // Set target icon display correctly
+        document.getElementById('target-icon').innerText = correctIcon;
 
         // Pick 4 random options including the correct one
         let options = shuffled.slice(0, 4).sort(() => 0.5 - Math.random());
