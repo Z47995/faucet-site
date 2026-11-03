@@ -1,19 +1,55 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Free Crypto Faucet | Earn Rewards</title>
+    <title>Secure Crypto Faucet | Advanced Anti-Bot</title>
     <style>
         body { font-family: system-ui, sans-serif; background: #0f0f12; color: #fff; margin: 0; padding: 15px; text-align: center; }
         .container { max-width: 450px; margin: 0 auto; background: #1a1a24; padding: 20px; border-radius: 16px; border: 1px solid #2a2a3a; }
         .ad-box { background: #252535; border: 1px dashed #444; padding: 15px; margin: 15px 0; border-radius: 8px; color: #888; font-size: 13px; }
         .captcha-card { background: #12121a; padding: 15px; border-radius: 12px; margin: 15px 0; border: 1px solid #333; }
-        .icons-grid { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
-        .icon-btn { background: #252535; border: 2px solid #3a3a50; border-radius: 8px; width: 50px; height: 50px; cursor: pointer; font-size: 22px; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
-        .icon-btn:hover { border-color: #00ff88; background: #2a3a30; }
-        .btn-claim { width: 100%; background: #00ff88; color: #000; font-weight: bold; padding: 14px; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; opacity: 0.5; pointer-events: none; }
+        
+        .secure-code-box {
+            background: #000;
+            color: #00ff88;
+            font-family: monospace;
+            font-size: 26px;
+            letter-spacing: 6px;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px dashed #00ff88;
+            user-select: none;
+            filter: drop-shadow(0 0 2px rgba(0,255,136,0.5));
+            text-shadow: 2px 2px 4px rgba(255,0,0,0.3);
+        }
+        
+        .captcha-input {
+            width: 80%;
+            padding: 10px;
+            background: #252535;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .btn-verify {
+            background: #333;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-verify:hover { background: #444; }
+
+        .btn-claim { width: 100%; background: #00ff88; color: #000; font-weight: bold; padding: 14px; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; opacity: 0.5; pointer-events: none; margin-top: 10px; }
         .btn-claim.active { opacity: 1; pointer-events: auto; }
         .status-msg { margin-top: 15px; color: #00ff88; font-weight: bold; display: none; }
     </style>
@@ -21,25 +57,26 @@
 <body>
 
 <div class="container">
-    <h2>🎁 Crypto Faucet</h2>
-    <p>Claim your free crypto rewards instantly</p>
+    <h2>🛡️ Secure Crypto Faucet</h2>
+    <p>AI-Protected Free Rewards</p>
 
-    <!-- Top Ad Box -->
+    <!-- Top Ad Space -->
     <div class="ad-box">
         [Top Ad Banner Space: A-Ads / Monetag]
     </div>
 
     <!-- Dynamic Anti-Bot Captcha -->
     <div class="captcha-card">
-        <p style="font-size: 14px; color: #ccc;">Security Check: Select matching icon</p>
-        <div id="target-icon" style="font-size: 32px; margin: 10px 0;">⭐</div>
+        <p style="font-size: 13px; color: #ccc;">Security Check: Enter the exact code shown below</p>
         
-        <div class="icons-grid" id="iconsContainer">
-            <!-- Dynamic buttons will load here -->
-        </div>
+        <div id="captchaCode" class="secure-code-box">Loading...</div>
+        
+        <input type="text" id="userInput" class="captcha-input" placeholder="Enter security code..." autocomplete="off">
+        <br>
+        <button class="btn-verify" onclick="verifyCaptcha()">Verify Human</button>
     </div>
 
-    <!-- Bottom Ad Box -->
+    <!-- Bottom Ad Space -->
     <div class="ad-box">
         [Bottom Ad Banner Space: A-Ads / Monetag]
     </div>
@@ -49,59 +86,41 @@
 </div>
 
 <script>
-    const pool = ['🚀', '⭐', '🔥', '💎', '🛡️', '⚡', '🌀', '🔮'];
-    let correctIcon = '';
-    let isHuman = false;
+    let generatedString = "";
 
-    function generateCaptcha() {
-        isHuman = false;
+    function generateAdvancedCaptcha() {
         document.getElementById('claimBtn').classList.remove('active');
         document.getElementById('status').style.display = 'none';
+        document.getElementById('userInput').value = "";
 
-        // Shuffle pool and pick target
-        let shuffled = [...pool].sort(() => 0.5 - Math.random());
-        correctIcon = shuffled[0];
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&";
+        let result = "";
+        for (let i = 0; i < 6; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
         
-        // Set target icon display correctly
-        document.getElementById('target-icon').innerText = correctIcon;
-
-        // Pick 4 random options including the correct one
-        let options = shuffled.slice(0, 4).sort(() => 0.5 - Math.random());
-        
-        let container = document.getElementById('iconsContainer');
-        container.innerHTML = '';
-        
-        options.forEach(icon => {
-            let btn = document.createElement('button');
-            btn.className = 'icon-btn';
-            btn.innerText = icon;
-            btn.onclick = () => checkCaptcha(icon);
-            container.appendChild(btn);
-        });
+        generatedString = result;
+        document.getElementById('captchaCode').innerText = generatedString;
     }
 
-    function checkCaptcha(selectedIcon) {
-        if(selectedIcon === correctIcon) {
-            isHuman = true;
+    function verifyCaptcha() {
+        let userInp = document.getElementById('userInput').value.trim();
+        if (userInp === generatedString) {
             document.getElementById('claimBtn').classList.add('active');
-            alert('Verification successful! Click claim below.');
+            alert('Verification Passed! You can now click Claim Reward.');
         } else {
-            alert('Wrong icon! Captcha reloaded for security.');
-            generateCaptcha();
+            alert('Incorrect code! A new security code has been generated.');
+            generateAdvancedCaptcha();
         }
     }
 
     function claimReward() {
-        if(isHuman) {
-            document.getElementById('status').style.display = 'block';
-            document.getElementById('claimBtn').classList.remove('active');
-            // Reset captcha for next round after 2 seconds
-            setTimeout(generateCaptcha, 2000);
-        }
+        document.getElementById('status').style.display = 'block';
+        document.getElementById('claimBtn').classList.remove('active');
+        setTimeout(generateAdvancedCaptcha, 2000);
     }
 
-    // Initialize on load
-    window.onload = generateCaptcha;
+    window.onload = generateAdvancedCaptcha;
 </script>
 
 </body>
