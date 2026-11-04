@@ -53,7 +53,7 @@
 
 <div class="container">
     <h1>📄 Image to PDF Converter</h1>
-    <p>Select images from your device and convert them instantly into a high-quality PDF document.</p>
+    <p>Select images from your device and convert them instantly into a professional A4 PDF document.</p>
 
     <!-- Top A-Ads Banner -->
     <div class="ad-box">
@@ -102,18 +102,41 @@
         if (selectedFiles.length === 0) return;
 
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF();
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        const pageWidth = 210; // A4 width in mm
+        const pageHeight = 297; // A4 height in mm
+        const margin = 10; // 10mm margin
 
         for (let i = 0; i < selectedFiles.length; i++) {
             const file = selectedFiles[i];
             const imgData = await readFileAsDataURL(file);
 
             if (i > 0) pdf.addPage();
-            
-            pdf.addImage(imgData, 'JPEG', 10, 10, 190, 0);
+
+            // Load image to get its natural dimensions
+            const imgDimensions = await getImageDimensions(imgData);
+            let imgWidth = imgDimensions.width;
+            let imgHeight = imgDimensions.height;
+
+            const maxWidth = pageWidth - (margin * 2);
+            const maxHeight = pageHeight - (margin * 2);
+
+            let ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight);
+            let finalWidth = imgWidth * ratio;
+            let finalHeight = imgHeight * ratio;
+
+            let x = (pageWidth - finalWidth) / 2;
+            let y = (pageHeight - finalHeight) / 2;
+
+            pdf.addImage(imgData, 'JPEG', x, y, finalWidth, finalHeight);
         }
 
-        pdf.save('converted-images.pdf');
+        pdf.save('professional-converted.pdf');
     }
 
     function readFileAsDataURL(file) {
@@ -122,6 +145,15 @@
             reader.onload = () => resolve(reader.result);
             reader.onerror = reject;
             reader.readAsDataURL(file);
+        });
+    }
+
+    function getImageDimensions(url) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve({ width: img.width, height: img.height });
+            img.onerror = reject;
+            img.src = url;
         });
     }
 </script>
