@@ -1,14 +1,17 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Faucet | Earn Free Rewards</title>
+    <title>Image to PDF Converter | Convert JPG, PNG to PDF Free</title>
+    <!-- jsPDF Library for Client-Side PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        body { font-family: system-ui, sans-serif; background: #0f0f12; color: #fff; margin: 0; padding: 15px; text-align: center; }
-        .container { max-width: 480px; margin: 0 auto; background: #1a1a24; padding: 20px; border-radius: 16px; border: 1px solid #2a2a3a; }
-        
+        body { font-family: system-ui, -apple-system, sans-serif; background: #0f0f12; color: #fff; margin: 0; padding: 15px; text-align: center; }
+        .container { max-width: 500px; margin: 0 auto; background: #1a1a24; padding: 25px; border-radius: 16px; border: 1px solid #2a2a3a; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+        h1 { font-size: 22px; margin-bottom: 10px; color: #00ff88; }
+        p { color: #aaa; font-size: 14px; margin-bottom: 20px; }
+
         .ad-box { 
             background: #252535; 
             border: 1px dashed #444; 
@@ -19,139 +22,108 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            min-height: 250px;
         }
 
-        .captcha-card { background: #12121a; padding: 20px; border-radius: 12px; margin: 15px 0; border: 1px solid #333; }
-        
-        .secure-code-box {
-            background: #000;
-            color: #00ff88;
-            font-family: monospace;
-            font-size: 28px;
-            letter-spacing: 6px;
-            padding: 14px;
-            border-radius: 8px;
-            margin: 12px 0;
-            border: 1px dashed #00ff88;
-            user-select: none;
-            filter: drop-shadow(0 0 2px rgba(0,255,136,0.5));
-            text-shadow: 2px 2px 4px rgba(255,0,0,0.3);
-        }
-        
-        .captcha-input {
-            width: 85%;
-            padding: 12px;
-            background: #252535;
-            border: 1px solid #444;
-            color: #fff;
-            border-radius: 8px;
-            font-size: 16px;
-            text-align: center;
-            margin-top: 10px;
-            outline: none;
-        }
-        .captcha-input:focus { border-color: #00ff88; }
+        .upload-card { background: #12121a; padding: 25px; border-radius: 12px; border: 2px dashed #00ff88; margin: 15px 0; cursor: pointer; transition: 0.2s; }
+        .upload-card:hover { background: #181824; }
+        .file-input { display: none; }
 
-        .btn-verify {
-            background: #2d2d3f;
-            color: #fff;
-            border: 1px solid #444;
-            padding: 10px 20px;
-            border-radius: 6px;
-            margin-top: 12px;
-            cursor: pointer;
+        .btn-action {
+            width: 100%;
+            background: #00ff88;
+            color: #000;
             font-weight: bold;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 15px;
             transition: 0.2s;
         }
-        .btn-verify:hover { background: #3d3d5c; border-color: #00ff88; }
+        .btn-action:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-action:hover:not(:disabled) { background: #00cc6d; }
 
-        .btn-claim { 
-            width: 100%; 
-            background: #00ff88; 
-            color: #000; 
-            font-weight: bold; 
-            padding: 16px; 
-            border: none; 
-            border-radius: 10px; 
-            font-size: 18px; 
-            cursor: pointer; 
-            opacity: 0.4; 
-            pointer-events: none; 
-            margin-top: 10px; 
-            transition: 0.2s;
-        }
-        .btn-claim.active { opacity: 1; pointer-events: auto; }
-        .btn-claim.active:hover { background: #00cc6d; }
-        .status-msg { margin-top: 15px; color: #00ff88; font-weight: bold; display: none; }
+        #previewList { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .img-preview { width: 70px; height: 70px; object-fit: cover; border-radius: 6px; border: 1px solid #00ff88; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>💰 Crypto Faucet</h2>
-    <p style="color: #aaa; font-size: 14px;">Earn free crypto rewards every 5 minutes</p>
+    <h1>📄 Image to PDF Converter</h1>
+    <p>Select images from your device and convert them instantly into a high-quality PDF document.</p>
 
     <!-- Top A-Ads Banner -->
     <div class="ad-box">
         <iframe data-aa='2460951' src='//ad.a-ads.com/2460951?size=300x250' style='width:100%; height:250px; border:0; padding:0; overflow:hidden; background-color: transparent;'></iframe>
     </div>
 
-    <!-- Security Captcha -->
-    <div class="captcha-card">
-        <p style="font-size: 13px; color: #ccc;">Security Check: Enter the exact code shown below</p>
-        
-        <div id="captchaCode" class="secure-code-box">Loading...</div>
-        
-        <input type="text" id="userInput" class="captcha-input" placeholder="Enter security code..." autocomplete="off">
-        <br>
-        <button class="btn-verify" onclick="verifyCaptcha()">Verify Human</button>
+    <!-- Image Upload Area -->
+    <div class="upload-card" onclick="document.getElementById('imgInput').click()">
+        <p style="margin: 0; font-size: 16px; color: #fff;">📁 Click here to select images</p>
+        <span style="font-size: 12px; color: #888;">(You can select multiple images)</span>
+        <input type="file" id="imgInput" class="file-input" accept="image/*" multiple onchange="handleFiles(this.files)">
     </div>
+
+    <div id="previewList"></div>
+
+    <button id="convertBtn" class="btn-action" onclick="convertToPDF()" disabled>Convert & Download PDF ⬇️</button>
 
     <!-- Bottom A-Ads Banner -->
     <div class="ad-box">
         <iframe data-aa='2460951' src='//ad.a-ads.com/2460951?size=300x250' style='width:100%; height:250px; border:0; padding:0; overflow:hidden; background-color: transparent;'></iframe>
     </div>
-
-    <button id="claimBtn" class="btn-claim" onclick="claimReward()">Claim Reward 💰</button>
-    <div id="status" class="status-msg">Successfully claimed! +0.0001 USDT added.</div>
 </div>
 
 <script>
-    let generatedString = "";
+    let selectedFiles = [];
 
-    function generateAdvancedCaptcha() {
-        document.getElementById('claimBtn').classList.remove('active');
-        document.getElementById('status').style.display = 'none';
-        document.getElementById('userInput').value = "";
+    function handleFiles(files) {
+        selectedFiles = Array.from(files);
+        const previewContainer = document.getElementById('previewList');
+        previewContainer.innerHTML = '';
 
-        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&";
-        let result = "";
-        for (let i = 0; i < 6; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        
-        generatedString = result;
-        document.getElementById('captchaCode').innerText = generatedString;
-    }
-
-    function verifyCaptcha() {
-        let userInp = document.getElementById('userInput').value.trim();
-        if (userInp === generatedString) {
-            document.getElementById('claimBtn').classList.add('active');
-            alert('Verification Passed! You can now click Claim Reward.');
+        if (selectedFiles.length > 0) {
+            document.getElementById('convertBtn').disabled = false;
+            selectedFiles.forEach(file => {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.className = 'img-preview';
+                previewContainer.appendChild(img);
+            });
         } else {
-            alert('Incorrect code! A new security code has been generated.');
-            generateAdvancedCaptcha();
+            document.getElementById('convertBtn').disabled = true;
         }
     }
 
-    function claimReward() {
-        document.getElementById('status').style.display = 'block';
-        document.getElementById('claimBtn').classList.remove('active');
-        setTimeout(generateAdvancedCaptcha, 2500);
+    async function convertToPDF() {
+        if (selectedFiles.length === 0) return;
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+
+        for (let i = 0; i < selectedFiles.length; i++) {
+            const file = selectedFiles[i];
+            const imgData = await readFileAsDataURL(file);
+
+            if (i > 0) pdf.addPage();
+            
+            pdf.addImage(imgData, 'JPEG', 10, 10, 190, 0);
+        }
+
+        pdf.save('converted-images.pdf');
     }
 
-    window.onload = generateAdvancedCaptcha;
+    function readFileAsDataURL(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
 </script>
 
 </body>
