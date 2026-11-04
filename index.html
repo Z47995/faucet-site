@@ -45,15 +45,20 @@
         .btn-action:disabled { opacity: 0.4; cursor: not-allowed; }
         .btn-action:hover:not(:disabled) { background: #00cc6d; }
 
-        #previewList { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-        .img-preview { width: 70px; height: 70px; object-fit: cover; border-radius: 6px; border: 1px solid #00ff88; }
+        #previewList { margin-top: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .preview-item { display: flex; align-items: center; background: #12121a; padding: 10px; border-radius: 8px; border: 1px solid #2a2a3a; gap: 10px; }
+        .img-preview { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #00ff88; }
+        .file-name { font-size: 12px; color: #ccc; flex-grow: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .controls { display: flex; gap: 5px; }
+        .btn-control { background: #252535; color: #fff; border: 1px solid #444; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+        .btn-control:hover { background: #00ff88; color: #000; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>📄 Image to PDF Converter</h1>
-    <p>Select images from your device and convert them instantly into a professional A4 PDF document.</p>
+    <p>Select, reorder, and convert your images instantly into a professional A4 PDF.</p>
 
     <!-- Top A-Ads Banner -->
     <div class="ad-box">
@@ -81,21 +86,74 @@
     let selectedFiles = [];
 
     function handleFiles(files) {
-        selectedFiles = Array.from(files);
+        const newFiles = Array.from(files);
+        selectedFiles = selectedFiles.concat(newFiles);
+        renderPreviews();
+    }
+
+    function renderPreviews() {
         const previewContainer = document.getElementById('previewList');
         previewContainer.innerHTML = '';
 
         if (selectedFiles.length > 0) {
             document.getElementById('convertBtn').disabled = false;
-            selectedFiles.forEach(file => {
+            selectedFiles.forEach((file, index) => {
+                const item = document.createElement('div');
+                item.className = 'preview-item';
+
                 const img = document.createElement('img');
                 img.src = URL.createObjectURL(file);
                 img.className = 'img-preview';
-                previewContainer.appendChild(img);
+
+                const name = document.createElement('span');
+                name.className = 'file-name';
+                name.textContent = file.name;
+
+                const controls = document.createElement('div');
+                controls.className = 'controls';
+
+                if (index > 0) {
+                    const upBtn = document.createElement('button');
+                    upBtn.className = 'btn-control';
+                    upBtn.innerHTML = '▲';
+                    upBtn.onclick = () => moveFile(index, index - 1);
+                    controls.appendChild(upBtn);
+                }
+
+                if (index < selectedFiles.length - 1) {
+                    const downBtn = document.createElement('button');
+                    downBtn.className = 'btn-control';
+                    downBtn.innerHTML = '▼';
+                    downBtn.onclick = () => moveFile(index, index + 1);
+                    controls.appendChild(downBtn);
+                }
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn-control';
+                removeBtn.innerHTML = '❌';
+                removeBtn.onclick = () => removeFile(index);
+                controls.appendChild(removeBtn);
+
+                item.appendChild(img);
+                item.appendChild(name);
+                item.appendChild(controls);
+                previewContainer.appendChild(item);
             });
         } else {
             document.getElementById('convertBtn').disabled = true;
         }
+    }
+
+    function moveFile(from, to) {
+        const temp = selectedFiles[from];
+        selectedFiles[from] = selectedFiles[to];
+        selectedFiles[to] = temp;
+        renderPreviews();
+    }
+
+    function removeFile(index) {
+        selectedFiles.splice(index, 1);
+        renderPreviews();
     }
 
     async function convertToPDF() {
@@ -108,9 +166,9 @@
             format: 'a4'
         });
 
-        const pageWidth = 210; // A4 width in mm
-        const pageHeight = 297; // A4 height in mm
-        const margin = 10; // 10mm margin
+        const pageWidth = 210;
+        const pageHeight = 297;
+        const margin = 10;
 
         for (let i = 0; i < selectedFiles.length; i++) {
             const file = selectedFiles[i];
@@ -118,7 +176,6 @@
 
             if (i > 0) pdf.addPage();
 
-            // Load image to get its natural dimensions
             const imgDimensions = await getImageDimensions(imgData);
             let imgWidth = imgDimensions.width;
             let imgHeight = imgDimensions.height;
@@ -137,6 +194,7 @@
         }
 
         pdf.save('professional-converted.pdf');
+        // الصور لن تختفي وستبقى ظاهرة للمستخدم
     }
 
     function readFileAsDataURL(file) {
